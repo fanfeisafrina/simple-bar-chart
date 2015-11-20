@@ -51,13 +51,15 @@
         }
 
         .d3-tip {
+          font-family: serif;
+          font-size: 10px;
           line-height: 1;
-          font-weight: bold;
           padding: 12px;
           background: rgba(0, 0, 0, 0.8);
           color: #fff;
           border-radius: 2px;
           pointer-events: none;
+
         }
 
         /* Creates a small triangle extender for the tooltip */
@@ -152,6 +154,13 @@
         .scale(y)
         .orient("left");
 
+    var tip = d3.tip()
+        .attr("class", "d3-tip")
+        .html(function(d) {
+            var content = "$ "+d.MarketCap +"bn"; 
+            return content; 
+        });
+
 
     d3.csv("Largest-internet-companies.csv", convertToNumber, function(error, data){
         
@@ -177,13 +186,19 @@
         					.transition()
         					.duration(400)
         					.style({"opacity":0.3})
+                            tip.show(d);
         			})
-      			.on("mouseout",function(d){
-      				d3.select(this)
-      					.transition()
-      					.duration(400)
-      					.style({"opacity":1})
-      			});
+      		.on("mouseout",function(d){
+          				d3.select(this)
+          					.transition()
+          					.duration(400)
+          					.style({"opacity":1})
+                            tip.hide(d);
+      			   })
+            // .on('mouseover', tip.show)
+            // .on('mouseout', tip.hide);
+
+            
       	
       	bar = chart.selectAll("g")
     		.data(data)
@@ -192,19 +207,21 @@
         ar = chart.selectAll("g")
             .data(data)
             .enter().append("g");
+
+        // show text on the bars
             
-        bar.append("text")
-                .attr("x", function(d) { return x(d.Company) + 20; })
-                .attr("y", function(d){
-                    return y(d.MarketCap)+ 10;
-                })
-                .attr("dy", ".35em")
-                .attr('style', function(d) {
-                        return 'fill: white';
-                    })
-                .attr("text-anchor", "middle")  
-                .style("font-size", "10px")
-                .text(function(d) { return d.MarketCap; });
+        // bar.append("text")
+        //         .attr("x", function(d) { return x(d.Company) + 20; })
+        //         .attr("y", function(d){
+        //             return y(d.MarketCap)+ 10;
+        //         })
+        //         .attr("dy", ".35em")
+        //         .attr('style', function(d) {
+        //                 return 'fill: white';
+        //             })
+        //         .attr("text-anchor", "middle")  
+        //         .style("font-size", "10px")
+        //         .text(function(d) { return d.MarketCap; });
 
 
 
@@ -221,38 +238,15 @@
             .attr("transform", "translate(-10,0)rotate(-65)")
             .style("text-anchor", "end");
 
-        var tip = d3.tip()
-            .attr("class", "d3-tip")
-            .html(function(d) {
-                var content = "<strong>MarketCap:</strong> " + d.MarketCap; 
-                return content; 
-            });
+       
 
         //via d3-tip readme:
 
         /* Invoke the tip in the context of your visualization */
-        vis.call(tip)
-
-        vis.selectAll('rect')
-          .data(data)
-          .enter()
-          .append('rect')
-          .attr('width', function() { return x.rangeBand() })
-          .attr('height', function(d) { return height - y(d.MarketCap) })
-          .attr("x", function(d) { return x(d.Company) + 20; })
-                .attr("y", function(d){
-                    return y(d.MarketCap)+ 10;
-                })
-                .attr("dy", ".35em")
-          .on('mouseover', tip.show)
-          .on('mouseout', tip.hide);
+        svg.call(tip)
 
 
-
-        
-
-
-
+    
     });
 
     function convertToNumber(d){
